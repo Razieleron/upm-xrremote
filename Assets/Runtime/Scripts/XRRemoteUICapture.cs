@@ -24,6 +24,7 @@ namespace XRRemote
         [SerializeField] LayerMask layerToCapture;
 
         [SerializeField, Range(0.01f, 1.0f)] private float textureScaleFactor = 1.0f;
+        [SerializeField, Min(0.01f)] private float timeBetweenFrames = 0.750f;
 
         [SerializeField] private RawImage testImage;
 
@@ -32,8 +33,6 @@ namespace XRRemote
         int width = 1080 / 15;
         int height = 1920 / 15;
         int depthBuffer = 0;
-
-        private FragmentSender fragmentSender;
 
         private void Awake()
         {
@@ -54,14 +53,6 @@ namespace XRRemote
             //     canvasWidth = Mathf.RoundToInt(uiCanvasRectTransform.rect.width);
             //     canvasHeight = Mathf.RoundToInt(uiCanvasRectTransform.rect.height);
             // }
-
-            if (TryGetComponent<FragmentSender>(out FragmentSender fragmentSender)) {
-                this.fragmentSender = fragmentSender;
-            } else {
-                if (DebugFlags.displayXRFragmentSender) {
-                    Debug.LogWarningFormat("XRRemoteUICapture: required FragmentSender component not found.");
-                }
-            }
         }
 
         private void Start()
@@ -71,8 +62,6 @@ namespace XRRemote
 
         private IEnumerator StreamUiToDevice()
         {
-            float timeBetweenFrames = 0.10f;
-
             while (true) {
                 CaptureUiToRenderTexture();
                 yield return new WaitForSeconds(timeBetweenFrames);
@@ -109,10 +98,9 @@ namespace XRRemote
             uiScreenShot.ReadPixels(new Rect(0,0, targetTexture.width, targetTexture.height), 0, 0);
             RenderTexture.active = null;
 
-            //Start sending uncompressed version of the UI capture
+            //Get uncompressed version of the UI capture
             byte[] textureData = uiScreenShot.EncodeToPNG();
             //Debug.Log($"Texture UNcompressed data is {textureData.Length} bytes");
-            //fragmentSender.SendBytesToClient(Time.frameCount, textureData);
             
             //Scale texture
             if (textureScaleFactor < 1f) {
@@ -132,6 +120,8 @@ namespace XRRemote
 
                 //Debug.Log($"OnUICaptureRecieved: {remoteCanvasTexture.width} x {remoteCanvasTexture.height}");
                 testImage.texture = remoteCanvasTexture;
+
+                UnityEngine.Object.Destroy(remoteCanvasTexture);
             }
 
             //Compress byte array before sending over
@@ -140,8 +130,11 @@ namespace XRRemote
             //Broadcast event
             OnUICaptured?.Invoke(this, new OnUICapturedArgs {
                 frameCount = Time.frameCount,
+                timeStamp = System.DateTime.Now.ToBinary(),
                 data = textureData,
             });
+
+            UnityEngine.Object.Destroy(uiScreenShot);
         }
     }
 #endif

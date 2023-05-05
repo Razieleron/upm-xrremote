@@ -154,7 +154,7 @@ namespace XRRemote
         /// </summary>
         public RawImage remoteCanvas;
         private Texture2D remoteCanvasTexture;
-        public XRRemoteUIReceiver uiReceiver;
+        //public XRRemoteUIReceiver uiReceiver;
 
         private string ConnectionMessage(string baseMessage)
         {
@@ -445,20 +445,20 @@ namespace XRRemote
 
         private bool SetupUIReceiver()
         {
-            if (uiReceiver != null) return true;
+            // if (uiReceiver != null) return true;
 
-            uiReceiver = FindObjectOfType<XRRemoteUIReceiver>();
+            // uiReceiver = FindObjectOfType<XRRemoteUIReceiver>();
 
-            if (uiReceiver == null)
-            {
-                if (log)
-                {
-                    Debug.LogErrorFormat(
-                        ConnectionMessage(
-                            string.Format("Event: 'XRRemoteUIReceiver' not found")));
-                }
-                return false;
-            }
+            // if (uiReceiver == null)
+            // {
+            //     if (log)
+            //     {
+            //         Debug.LogErrorFormat(
+            //             ConnectionMessage(
+            //                 string.Format("Event: 'XRRemoteUIReceiver' not found")));
+            //     }
+            //     return false;
+            // }
 
             return true; 
         }
@@ -584,6 +584,9 @@ namespace XRRemote
 
             readyForFrame = false;
 
+            //Add timestamp
+            xrRemotePacket.timeStamp = System.DateTime.Now.ToBinary();
+
             //
             // send down the relevant pose information for the
             // system. 
@@ -619,7 +622,12 @@ namespace XRRemote
 
             System.DateTime currentTime = System.DateTime.Now;
             System.DateTime captureTime = System.DateTime.FromBinary(xrUiCapturePacket.timeStamp);
-            Debug.LogError($"Capture took {currentTime.Subtract(captureTime).ToString()}");
+            Debug.LogError($"Capture took {currentTime.Subtract(captureTime).ToString()} to receive.");
+
+System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+stopwatch.Start();
+
+//Thing to time
 
             //Decompress and read data as Texture2d
             //Decompress data
@@ -630,26 +638,10 @@ namespace XRRemote
             //Show remote canvas
             remoteCanvas.texture = remoteCanvasTexture;
             remoteCanvas.enabled = true;
-        }
 
-        /// <summary>
-        /// Start receiving UI canvas data
-        /// </summary>
-        private void OnUIStartFragmentRecieved(StartFragmentPacket startfragmentPacket)
-        {
-            if (uiReceiver == null) return;
-
-            uiReceiver.ReceiveStartFragmentPacket(startfragmentPacket);
-        }
-
-        /// <summary>
-        /// Receive UI canvas data fragments
-        /// </summary>
-        private void OnUIDataFragmentRecieved(DataFragmentPacket datafragmentPacket)
-        {
-            if (uiReceiver == null) return;
-
-            uiReceiver.ReceiveDataFragmentPacket(datafragmentPacket);
+stopwatch.Stop();
+Debug.Log ("Time taken: "+(stopwatch.Elapsed));
+stopwatch.Reset();
         }
 
 #region EDITOR_CONNECTION_TESTING
@@ -693,8 +685,6 @@ namespace XRRemote
             if (obj is XRFrameReadyPacket) OnReadyForFrameEvent(obj as XRFrameReadyPacket);
             if (obj is EditorARKitSessionInitialized) OnARKitSessionInitializationMessage(obj as EditorARKitSessionInitialized);
             if (obj is XRUICapturePacket) OnUICaptureRecieved(obj as XRUICapturePacket);
-            if (obj is StartFragmentPacket) OnUIStartFragmentRecieved(obj as StartFragmentPacket);
-            if (obj is DataFragmentPacket) OnUIDataFragmentRecieved(obj as DataFragmentPacket);
         }
     }
 }
