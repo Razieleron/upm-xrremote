@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
-namespace XRRemote
+namespace KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension
 {
-    public class XRRemotePlaneSender : MonoBehaviour
+    public class CustomPlaneSender : MonoBehaviour
     {
         private PlanesInfo planesInfo = null;
 
@@ -17,9 +17,9 @@ namespace XRRemote
             arPlaneManager = FindObjectOfType<ARPlaneManager>();
 
             if (arPlaneManager == null) {
-                if (DebugFlags.displayEditorConnectionStats) {
-                    Debug.LogError($"XRRemotePlaneSender: Unable to ARPlaneManager. Please make sure there is one in the scene.");
-                }
+                // if (DebugFlags.displayEditorConnectionStats) {
+                //     Debug.LogError($"XRRemotePlaneSender: Unable to ARPlaneManager. Please make sure there is one in the scene.");
+                // }
 
                 enabled = false;
                 return;

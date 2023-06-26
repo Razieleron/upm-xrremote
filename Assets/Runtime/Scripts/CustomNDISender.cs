@@ -4,12 +4,16 @@ using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
 using Klak.Ndi;
 using KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension;
+using System.Runtime.InteropServices;
+
+
 
 [DisallowMultipleComponent]
 [Serializable]
 
 public sealed class CustomNdiSender : MonoBehaviour
 {    
+    [SerializeField] private CustomPlaneSender planeSender = null;
     [SerializeField] private ARCameraManager cameraManager = null;
     [SerializeField] private ARCameraBackground cameraBackground = null;
     [SerializeField] private NdiResources resources = null;
@@ -73,6 +77,12 @@ public sealed class CustomNdiSender : MonoBehaviour
 
             //Set metadata
             RemotePacket testPacket = new RemotePacket();
+
+            if (planeSender.TryGetPlanesInfo(out PlanesInfo planesInfo)) {
+                    testPacket.planesInfo = planesInfo;
+                } else {
+                    testPacket.planesInfo = null;
+                }
 
             //Serialize metadata
             byte[] serializedData = ObjectSerializationExtension.SerializeToByteArray(testPacket); 
