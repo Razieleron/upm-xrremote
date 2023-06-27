@@ -5,6 +5,7 @@ using UnityEngine.XR.ARFoundation;
 using Klak.Ndi;
 using KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension;
 using System.Runtime.InteropServices;
+using UnityEngine.UI;
 
 
 
@@ -17,7 +18,9 @@ public sealed class CustomNdiSender : MonoBehaviour
     [SerializeField] private ARCameraManager cameraManager = null;
     [SerializeField] private ARCameraBackground cameraBackground = null;
     [SerializeField] private NdiResources resources = null;
-    
+    [SerializeField] private Text frameInfoText = null; 
+    [SerializeField] private Text timestampText = null; 
+
     private int frameCount = 0;
     
     public MeshRenderer ndiSenderVisualizer = null;
@@ -74,25 +77,32 @@ public sealed class CustomNdiSender : MonoBehaviour
             int width = cameraBackground.material.mainTexture.width; 
             int height = cameraBackground.material.mainTexture.height;
             InitNdi(width, height);
-
-            //Set metadata
-            RemotePacket testPacket = new RemotePacket();
-
-            if (planeSender.TryGetPlanesInfo(out PlanesInfo planesInfo)) {
-                    testPacket.planesInfo = planesInfo;
-                } else {
-                    testPacket.planesInfo = null;
-                }
-
-            //Serialize metadata
-            byte[] serializedData = ObjectSerializationExtension.SerializeToByteArray(testPacket); 
-            ndiSender.metadata = "<![CDATA[" + Convert.ToBase64String(serializedData) + "]]>";
         }
+
+        //Set metadata
+        RemotePacket testPacket = new RemotePacket();
+        testPacket.frameInfo = frameCount;
+        testPacket.timestamp = args.timestampNs;
+
         
+        if (planeSender.TryGetPlanesInfo(out PlanesInfo planesInfo)) {
+                testPacket.planesInfo = planesInfo;
+            } else {
+                testPacket.planesInfo = null;
+            }
+
+        // Serialize metadata
+        byte[] serializedData = ObjectSerializationExtension.SerializeToByteArray(testPacket);
+        testPacket.bytesSent = serializedData.Length;
+        byte[] serializedDataWithByteArrayLength = ObjectSerializationExtension.SerializeToByteArray(testPacket);
+        ndiSender.metadata = "<![CDATA[" + Convert.ToBase64String(serializedDataWithByteArrayLength) + "]]>";
+            
         commandBuffer.Blit(null, renderTexture, cameraBackground.material);
         Graphics.ExecuteCommandBuffer(commandBuffer);
         commandBuffer.Clear();
         
+        frameInfoText.text = $"Frame: {testPacket.frameInfo}";
+        timestampText.text = $"Timestamp: {testPacket.timestamp}";
         frameCount++;
     } 
 

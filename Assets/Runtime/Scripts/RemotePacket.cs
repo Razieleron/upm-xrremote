@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System;
 using UnityEngine;
 using XRRemote;
@@ -10,6 +11,10 @@ namespace KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension
     public partial class RemotePacket
     {
         public CameraFrameEvent cameraFrame;
+        // todo make frameInfo and timestamp their own object classes
+        public int frameInfo;
+        public long? timestamp;
+        public int bytesSent;
         // public FaceInfo face;
         // public Pose trackedPose;
         public PlanesInfo planesInfo;

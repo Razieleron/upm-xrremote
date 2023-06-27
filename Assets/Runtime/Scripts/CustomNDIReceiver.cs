@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using Klak.Ndi;
+using UnityEngine.UI;
 
 using KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension;
 
@@ -11,9 +12,14 @@ public class CustomNdiReceiver : MonoBehaviour
     private NdiResources resources = null;
     private NdiReceiver ndiReceiver = null;
     public CustomRawImage rawImage = null;
+
     public RemotePacket remotePacket { get; private set; } = null;
     public static CustomNdiReceiver Instance { get; private set; } = null;
     public event EventHandler OnPlanesInfoReceived;
+    public Text frameInfoText =null;
+    public Text timeStampText = null;
+
+    public Text clientFrameInfoText = null; 
 
     private void Awake()
     {
@@ -51,6 +57,7 @@ public class CustomNdiReceiver : MonoBehaviour
 
     private void Update()
     {
+        clientFrameInfoText.text = $"Client Side Frame Count: {Time.frameCount}";
         var rt = ndiReceiver.texture;
         if (rt == null)
         {
@@ -76,9 +83,12 @@ public class CustomNdiReceiver : MonoBehaviour
 
             RemotePacket receivedData = ObjectSerializationExtension.Deserialize<RemotePacket>(data); 
             CustomNdiReceiver.Instance.remotePacket = receivedData;
+            
+            //check text fields
+           timeStampText.text = $"Timestamp: {receivedData.timestamp}";
+           frameInfoText.text = $"Frame Count: {receivedData.frameInfo}";
 
             //check and add planes info
-            Debug.Log("receivedData.planesInfo: " + receivedData.planesInfo);
             if (receivedData.planesInfo != null) 
             {
             OnPlanesInfoReceived?.Invoke(this, EventArgs.Empty);
