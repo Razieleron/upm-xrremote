@@ -1,23 +1,27 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(AspectRatioFitter))]
-public class CustomRawImage : RawImage
+namespace KlakNDI_Test.Assets.Scripts.ObjectSerializationExtension
 {
-    public float deviceAspectRatio; // Property in the custom object class
 
-    private void Start()
+    [RequireComponent(typeof(AspectRatioFitter))]
+    public class CustomRawImage : RawImage
     {
-        AspectRatioFitter aspectFitter = GetComponent<AspectRatioFitter>();
-        if (aspectFitter != null)
+        public float deviceAspectRatio; // Property in the custom object class
+
+        private void Start()
         {
-            aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-            // Set the property of the required AspectRatioFitter component based on the custom object class property
-            aspectFitter.aspectRatio = deviceAspectRatio;
-            if (aspectFitter.aspectRatio == 0)
+            AspectRatioFitter aspectFitter = GetComponent<AspectRatioFitter>();
+            if (aspectFitter != null)
             {
-                aspectFitter.aspectRatio = .565f;    
-            }    
+                aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+                // Set the property of the required AspectRatioFitter component based on the custom object class property
+                aspectFitter.aspectRatio = deviceAspectRatio;
+                if (aspectFitter.aspectRatio == 0)
+                {
+                    aspectFitter.aspectRatio = .565f;    
+                }    
+            }
         }
     }
 }

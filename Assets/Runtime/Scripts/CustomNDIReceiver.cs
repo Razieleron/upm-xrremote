@@ -9,11 +9,11 @@ public class CustomNdiReceiver : MonoBehaviour
 {
     [SerializeField] 
     private NdiResources resources = null;
-
     private NdiReceiver ndiReceiver = null;
     public CustomRawImage rawImage = null;
-    public static CustomNdiReceiver Instance { get; private set; } = null;
     public RemotePacket remotePacket { get; private set; } = null;
+    public static CustomNdiReceiver Instance { get; private set; } = null;
+    public event EventHandler OnPlanesInfoReceived;
 
     private void Awake()
     {
@@ -76,6 +76,13 @@ public class CustomNdiReceiver : MonoBehaviour
 
             RemotePacket receivedData = ObjectSerializationExtension.Deserialize<RemotePacket>(data); 
             CustomNdiReceiver.Instance.remotePacket = receivedData;
+
+            //check and add planes info
+            Debug.Log("receivedData.planesInfo: " + receivedData.planesInfo);
+            if (receivedData.planesInfo != null) 
+            {
+            OnPlanesInfoReceived?.Invoke(this, EventArgs.Empty);
+            }
             ndiReceiver.metadata = null;
         }
     }
